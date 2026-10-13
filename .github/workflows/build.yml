@@ -1,111 +1,165 @@
-name: Build Pro APK
-​on:
-push:
-branches: [ main, master ]
-​jobs:
-build:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout Code
-uses: actions/checkout@v4
-​- name: Set up JDK 17
-uses: actions/setup-java@v5
-with:
-distribution: 'temurin'
-java-version: '17'
-​- name: Setup Android Project & WebView Wrapper
-run: |
-mkdir -p app/src/main/assets app/src/main/java/com/pro/app
-​cat << 'EOF' > app/build.gradle
-plugins {
-id 'com.android.application'
-}
-android {
-compileSdk 34
-defaultConfig {
-applicationId "com.pro.studio"
-minSdk 21
-targetSdk 34
-versionCode 1
-versionName "1.0.0"
-}
-}
-dependencies {
-implementation 'androidx.appcompat:appcompat:1.6.1'
-}
-EOF
-​cat << 'EOF' > build.gradle
-buildscript {
-repositories {
-google()
-mavenCentral()
-}
-dependencies {
-classpath 'com.android.tools.build:gradle:8.1.1'
-}
-}
-allprojects {
-repositories {
-google()
-mavenCentral()
-}
-}
-EOF
-​cat << 'EOF' > settings.gradle
-include ':app'
-rootProject.name = "ProStudio"
-EOF
-​cat << 'EOF' > app/src/main/AndroidManifest.xml
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro HTML to APK Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4">
+    <div class="max-w-xl mx-auto space-y-6">
+        
+        <!-- Başlık -->
+        <header class="text-center py-4 bg-slate-800 rounded-2xl shadow-lg border border-slate-700">
+            <h1 class="text-2xl font-bold text-cyan-400">📱 Pro HTML to APK Studio</h1>
+            <p class="text-sm text-slate-400 mt-1">Telefondan Kodla, GitHub ile APK Üret</p>
+        </header>
+
+        <!-- 1. Temel Proje Ayarları -->
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 space-y-4">
+            <h2 class="text-lg font-semibold text-emerald-400">1. Proje Kimliği</h2>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Uygulama Adı</label>
+                <input type="text" id="appName" value="OfflineApp" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:border-cyan-500">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Paket Adı (Package Name)</label>
+                <input type="text" id="packageName" value="com.offline.app" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:border-cyan-500">
+            </div>
+        </section>
+
+        <!-- 2. Android İzinleri -->
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 space-y-3">
+            <h2 class="text-lg font-semibold text-emerald-400">2. Android İzinleri</h2>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700">
+                    <input type="checkbox" id="permInternet" checked class="accent-cyan-500 w-4 h-4">
+                    <span>İnternet</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700">
+                    <input type="checkbox" id="permLocation" class="accent-cyan-500 w-4 h-4">
+                    <span>Konum (GPS)</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700">
+                    <input type="checkbox" id="permMic" class="accent-cyan-500 w-4 h-4">
+                    <span>Mikrofon</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700">
+                    <input type="checkbox" id="permCamera" class="accent-cyan-500 w-4 h-4">
+                    <span>Kamera</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700 col-span-2">
+                    <input type="checkbox" id="permStorage" class="accent-cyan-500 w-4 h-4">
+                    <span>Harici Depolama / Dosya Erişimi</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 3. Swipe ve Özellik Seçimi -->
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 space-y-3">
+            <h2 class="text-lg font-semibold text-emerald-400">3. Hareketler ve Şablon</h2>
+            <label class="flex items-center space-x-2 bg-slate-900 p-3 rounded-xl border border-slate-700 text-sm">
+                <input type="checkbox" id="enableSwipe" checked class="accent-cyan-500 w-4 h-4">
+                <span>Sağa/Sola Swipe (Kaydırma) Desteğini Aktif Et</span>
+            </label>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Uygulama HTML/JS Kodlarınız</label>
+                <textarea id="appCode" rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs font-mono focus:outline-none focus:border-cyan-500"><div id="content" class="p-6 text-center">
+    <h1 class="text-xl font-bold">Swipe Yapın!</h1>
+    <p class="text-slate-400 mt-2">Sağa veya sola kaydırın.</p>
+</div></textarea>
+            </div>
+        </section>
+
+        <!-- 4. Üretilen Dosyalar -->
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-emerald-400">4. GitHub İçin Hazır Kodlar</h2>
+                <button onclick="generateFiles()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition">Kodları Güncelle</button>
+            </div>
+
+            <!-- AndroidManifest.xml -->
+            <div>
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span>AndroidManifest.xml</span>
+                    <button onclick="copyText('outManifest')" class="text-cyan-400 hover:underline">Kopyala</button>
+                </div>
+                <textarea id="outManifest" readonly rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-300"></textarea>
+            </div>
+
+            <!-- build.yml -->
+            <div>
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span>.github/workflows/build.yml</span>
+                    <button onclick="copyText('outYml')" class="text-cyan-400 hover:underline">Kopyala</button>
+                </div>
+                <textarea id="outYml" readonly rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-300"></textarea>
+            </div>
+
+            <!-- index.html -->
+            <div>
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span>app/src/main/assets/index.html</span>
+                    <button onclick="copyText('outHtml')" class="text-cyan-400 hover:underline">Kopyala</button>
+                </div>
+                <textarea id="outHtml" readonly rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-mono text-slate-300"></textarea>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        function generateFiles() {
+            const appName = document.getElementById('appName').value;
+            const packageName = document.getElementById('packageName').value;
+            const userCode = document.getElementById('appCode').value;
+            const swipeActive = document.getElementById('enableSwipe').checked;
+
+            // İzinler
+            let permissions = '';
+            if(document.getElementById('permInternet').checked) permissions += '    <uses-permission android:name="android.permission.INTERNET" />\n';
+            if(document.getElementById('permLocation').checked) permissions += '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n';
+            if(document.getElementById('permMic').checked) permissions += '    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n';
+            if(document.getElementById('permCamera').checked) permissions += '    <uses-permission android:name="android.permission.CAMERA" />\n';
+            if(document.getElementById('permStorage').checked) permissions += '    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />\n';
+
+            // Manifest
+            const manifestContent = `<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-package="com.pro.studio">
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.RECORD_AUDIO" />
-<uses-permission android:name="android.permission.CAMERA" />
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-<application
-android:allowBackup="true"
-android:label="Pro APK Studio"
-android:theme="@style/Theme.AppCompat.NoActionBar">
-<activity
-android:name=".MainActivity"
-android:exported="true">
-<intent-filter>
-<action android:name="android.intent.action.MAIN" />
-<category android:name="android.intent.category.LAUNCHER" />
-</intent-filter>
-</activity>
-</application>
-</manifest>
-EOF
-​cat << 'EOF' > app/src/main/java/com/pro/app/MainActivity.java
-package com.pro.studio;
-import android.os.Bundle;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import androidx.appcompat.app.AppCompatActivity;
-​public class MainActivity extends AppCompatActivity {
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-super.onCreate(savedInstanceState);
-WebView webView = new WebView(this);
-WebSettings settings = webView.getSettings();
-settings.setJavaScriptEnabled(true);
-settings.setDomStorageEnabled(true);
-settings.setAllowFileAccess(true);
-settings.setGeolocationEnabled(true);
-webView.setWebViewClient(new WebViewClient());
-webView.loadUrl("file:///android_asset/index.html");
-setContentView(webView);
-}
-}
-EOF
-​mv index.html app/src/main/assets/index.html
-​- name: Build Debug APK
-run: gradle assembleDebug
-​- name: Upload APK Artifact
-uses: actions/upload-artifact@v4
-with:
-name: app-debug
-path: app/build/outputs/apk/debug/*.apk 
+    package="${packageName}">
+${permissions}
+    <application
+        android:allowBackup="true"
+        android:label="${appName}"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>`;
+            document.getElementById('outManifest').value = manifestContent;
+
+            // build.yml
+            const ymlContent = `name: Build APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version
