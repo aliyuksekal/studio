@@ -1,0 +1,508 @@
+```html
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro HTML to APK Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; touch-action: manipulation; user-select: none; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #020617; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-full flex flex-col overflow-hidden">
+
+    <header class="bg-slate-900 border-b border-slate-800 p-3.5 flex items-center justify-between shrink-0 z-20">
+        <div class="flex items-center space-x-2.5">
+            <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-lg shadow-indigo-600/30">
+                <i class="fa-solid fa-rocket text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-xs text-white">Pro APK Studio</h1>
+                <p class="text-[10px] text-emerald-400 flex items-center"><span class="w-1.5 h-1.5 inline-block bg-emerald-400 rounded-full mr-1 animate-pulse"></span>Çevrimdışı Mod</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="openNewProjectModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl font-medium shadow-md shadow-indigo-600/20 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-plus"></i>
+                <span>Yeni Proje</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden flex flex-col relative">
+        
+        <!-- Projects List Tab -->
+        <div id="tab-projects" class="tab-content active flex-col flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Projelerim & Ayarlar</h2>
+                <span id="projectCount" class="text-xs bg-slate-900 border border-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full font-mono">0 Proje</span>
+            </div>
+            <div id="projectsList" class="space-y-3 pb-20">
+                <!-- Projeler dinamik olarak buraya eklenecek -->
+            </div>
+        </div>
+
+        <!-- Editor Tab -->
+        <div id="tab-editor" class="tab-content flex-col flex-1 p-4 space-y-3 bg-slate-900">
+            <div class="flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-2">
+                    <button onclick="switchTab('projects')" class="text-slate-400 hover:text-white p-1">
+                        <i class="fa-solid fa-arrow-left text-base"></i>
+                    </button>
+                    <span id="editingProjectName" class="font-bold text-sm text-white truncate max-w-[150px]">Proje Düzenle</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                    <button onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center space-x-1" title="Profesyonel APK İzinleri & Ayarları">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span class="hidden sm:inline">İzinler</span>
+                    </button>
+                    <button onclick="saveCurrentProject()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center space-x-1">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Kaydet</span>
+                    </button>
+                    <button onclick="runCurrentProject()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1 shadow-md">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Test Et</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                <button onclick="switchEditorSub('html')" id="sub-btn-html" class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition">HTML & Swipe</button>
+                <button onclick="switchEditorSub('css')" id="sub-btn-css" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">CSS Stil</button>
+                <button onclick="switchEditorSub('js')" id="sub-btn-js" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">JS Mantık</button>
+                <button onclick="switchEditorSub('export')" id="sub-btn-export" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-amber-400 hover:text-amber-300 transition"><i class="fa-solid fa-code-branch mr-1"></i> APK Kodları</button>
+            </div>
+
+            <div class="flex-1 relative flex flex-col">
+                <textarea id="codeHtml" class="editor-textarea custom-scrollbar flex-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-400 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                <textarea id="codeCss" class="editor-textarea custom-scrollbar flex-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 resize-none hidden"></textarea>
+                <textarea id="codeJs" class="editor-textarea custom-scrollbar flex-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-amber-300 focus:outline-none focus:border-indigo-500 resize-none hidden"></textarea>
+                
+                <!-- GitHub Actions & APK Generator Export View -->
+                <div id="codeExport" class="editor-textarea custom-scrollbar flex-1 w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-y-auto space-y-4 hidden">
+                    <div class="bg-indigo-950/40 border border-indigo-800/60 p-3 rounded-xl">
+                        <h4 class="font-bold text-indigo-300 mb-1 flex items-center"><i class="fa-solid fa-circle-info mr-1.5"></i> GitHub Actions ile APK Üretim Rehberi</h4>
+                        <p class="text-[11px] text-slate-400">Bu projeyi GitHub reponuza yükleyerek telefonunuza ait tam yetkili profesyonel APK dosyasını bulutta (Android SDK gerektirmeden) derleyebilirsiniz.</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-semibold text-slate-200">1. AndroidManifest.xml (İzinler & Konfigürasyon)</span>
+                            <button onclick="copyToClipboard('manifestOutput')" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 px-2 py-1 rounded text-[10px]"><i class="fa-solid fa-copy mr-1"></i> Kopyala</button>
+                        </div>
+                        <pre id="manifestOutput" class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-[11px] text-emerald-300 overflow-x-auto"></pre>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-semibold text-slate-200">2. GitHub Actions Workflow (.github/workflows/build.yml)</span>
+                            <button onclick="copyToClipboard('workflowOutput')" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 px-2 py-1 rounded text-[10px]"><i class="fa-solid fa-copy mr-1"></i> Kopyala</button>
+                        </div>
+                        <pre id="workflowOutput" class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-[11px] text-amber-300 overflow-x-auto"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Runner / Preview Fullscreen Tab -->
+        <div id="tab-runner" class="tab-content flex-col flex-1 relative bg-slate-950">
+            <div class="absolute top-3 right-3 z-50 flex items-center space-x-2">
+                <button onclick="switchTab('editor')" class="bg-slate-900/90 backdrop-blur border border-slate-700 text-white text-xs px-3 py-1.5 rounded-xl shadow-2xl flex items-center space-x-1.5">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>Editöre Dön</span>
+                </button>
+            </div>
+            <iframe id="previewFrame" class="w-full h-full border-0"></iframe>
+        </div>
+    </main>
+
+    <!-- Project Settings & Permissions Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-md space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-white flex items-center">
+                    <i class="fa-solid fa-sliders text-indigo-400 mr-2"></i> Profesyonel APK Ayarları & İzinleri
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">Paket Adı (Package Name)</label>
+                    <input type="text" id="pkgName" placeholder="örn: com.benimapp.mobil" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono">
+                    <p class="text-[10px] text-slate-500 mt-0.5">Google Play ve Android sistem tanımlayıcısı.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Uygulama Sürüm Adı</label>
+                        <input type="text" id="pkgVersionName" value="1.0.0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Sürüm Kodu (Code)</label>
+                        <input type="number" id="pkgVersionCode" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <label class="block text-xs font-bold text-indigo-400 mb-2">Android Sistem İzinleri (Permissions)</label>
+                    <div class="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="permInternet" checked class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 w-4 h-4">
+                            <span>İnternet Erişimi (<code class="text-indigo-400 text-[10px]">INTERNET</code>)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="permLocation" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 w-4 h-4">
+                            <span>Konum / GPS Erişimi (<code class="text-indigo-400 text-[10px]">ACCESS_FINE_LOCATION</code>)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="permAudio" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 w-4 h-4">
+                            <span>Mikrofon / Ses Kaydı (<code class="text-indigo-400 text-[10px]">RECORD_AUDIO</code>)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="permCamera" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 w-4 h-4">
+                            <span>Kamera Erişimi (<code class="text-indigo-400 text-[10px]">CAMERA</code>)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="permStorage" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 w-4 h-4">
+                            <span>Dosya / Depolama Erişimi (<code class="text-indigo-400 text-[10px]">WRITE_EXTERNAL_STORAGE</code>)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <label class="block text-xs font-bold text-indigo-400 mb-2">Navigasyon ve Jestler</label>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="featureSwipe" checked class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-0 w-4 h-4">
+                            <span>Sağa/Sola Kaydırma (<span class="text-emerald-400">Swipe Navigation</span>) Desteği</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeSettingsModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow-lg shadow-indigo-600/30">Ayarları Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Project Modal -->
+    <div id="projectModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-base text-white flex items-center">
+                <i class="fa-solid fa-folder-plus text-indigo-400 mr-2"></i> Yeni Profesyonel Proje
+            </h3>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Proje Adı</label>
+                <input type="text" id="newProjName" placeholder="Örn: Swipe Notlarım" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeNewProjectModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold transition">İptal</button>
+                <button onclick="createNewProject()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow-lg shadow-indigo-600/30">Oluştur</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">İşlem başarılı</span>
+    </div>
+
+    <script>
+        let projects = JSON.parse(localStorage.getItem('pro_apk_studio_projects') || '[]');
+        let currentProjectId = null;
+
+        // Örnek başlangıç projesi (Swipe özellikli ve profesyonel şablon)
+        if (projects.length === 0) {
+            projects.push({
+                id: 'proj_' + Date.now(),
+                name: 'Örnek Swipe Mobil Uygulama',
+                packageName: 'com.pro.swipeapp',
+                versionName: '1.0.0',
+                versionCode: 1,
+                permissions: { internet: true, location: true, audio: false, camera: false, storage: true },
+                swipeEnabled: true,
+                html: `<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Mobil App</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { touch-action: pan-y; user-select: none; }
+        .page { display: none; }
+        .page.active { display: flex; }
+    </style>
+</head>
+<body class="bg-slate-950 text-white h-screen flex flex-col overflow-hidden">
+    <header class="bg-slate-900 p-4 border-b border-slate-800 text-center font-bold text-xs uppercase tracking-wider text-indigo-400">
+        Swipe Mobil Studio
+    </header>
+    <main class="flex-1 relative overflow-hidden flex">
+        <!-- Sayfa 1 -->
+        <div class="page active flex-col items-center justify-center w-full h-full p-6 text-center absolute inset-0 bg-slate-950">
+            <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-3 shadow-lg shadow-indigo-600/40">
+                <i class="fa-solid fa-house"></i>
+            </div>
+            <h2 class="text-base font-bold mb-1">Ana Sayfa</h2>
+            <p class="text-xs text-slate-400">Sağa veya sola kaydırarak (swipe) sayfalar arası akıcı geçiş yapın.</p>
+            <div class="mt-6 text-[11px] text-indigo-400 animate-pulse bg-indigo-950/60 px-3 py-1.5 rounded-full border border-indigo-800/50">
+                <i class="fa-solid fa-arrow-right mr-1"></i> Sola Kaydır
+            </div>
+        </div>
+        <!-- Sayfa 2 -->
+        <div class="page flex-col items-center justify-center w-full h-full p-6 text-center absolute inset-0 bg-slate-950">
+            <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-3 shadow-lg shadow-emerald-600/40">
+                <i class="fa-solid fa-compass"></i>
+            </div>
+            <h2 class="text-base font-bold mb-1">Keşfet & İzinler</h2>
+            <p class="text-xs text-slate-400">Bu uygulama konum ve depolama gibi profesyonel izinlerle derlenebilir.</p>
+            <div class="mt-6 text-[11px] text-emerald-400 animate-pulse bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-800/50">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Sağa Kaydır
+            </div>
+        </div>
+    </main>
+    <script>
+        let cur = 0;
+        const pages = document.querySelectorAll('.page');
+        let startX = 0;
+        document.addEventListener('touchstart', e => { startX = e.changedTouches[0].screenX; }, false);
+        document.addEventListener('touchend', e => {
+            let endX = e.changedTouches[0].screenX;
+            if (endX < startX - 60 && cur < pages.length - 1) { pages[cur].classList.remove('active'); cur++; pages[cur].classList.add('active'); }
+            if (endX > startX + 60 && cur > 0) { pages[cur].classList.remove('active'); cur--; pages[cur].classList.add('active'); }
+        }, false);
+    <\/script>
+</body>
+</html>`,
+                css: '/* Özel stil kuralları */',
+                js: '// JavaScript mantığı'
+            });
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('pro_apk_studio_projects', JSON.stringify(projects));
+            renderProjectsList();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
+
+        function switchTab(tabId) {
+            ['projects', 'editor', 'runner'].forEach(t => {
+                document.getElementById('tab-' + t).classList.remove('active');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function switchEditorSub(sub) {
+            ['html', 'css', 'js', 'export'].forEach(s => {
+                const el = document.getElementById(s === 'export' ? 'codeExport' : 'code' + s.toUpperCase());
+                if (el) el.classList.add('hidden');
+                document.getElementById('sub-btn-' + s).className = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+            });
+            
+            const targetEl = document.getElementById(sub === 'export' ? 'codeExport' : 'code' + sub.toUpperCase());
+            if (targetEl) targetEl.classList.remove('hidden');
+            
+            const activeBtn = document.getElementById('sub-btn-' + sub);
+            if (sub === 'export') {
+                activeBtn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-amber-600 text-white transition shadow-lg shadow-amber-600/20";
+                generateExportCodes();
+            } else {
+                activeBtn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition shadow-lg shadow-indigo-600/20";
+            }
+        }
+
+        function renderProjectsList() {
+            const container = document.getElementById('projectsList');
+            document.getElementById('projectCount').innerText = projects.length + ' Proje';
+            container.innerHTML = '';
+
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-md hover:border-slate-700 transition";
+                card.innerHTML = \`
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="w-10 h-10 bg-indigo-600/20 text-indigo-400 rounded-xl flex items-center justify-center shrink-0 border border-indigo-500/30">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 class="font-bold text-xs text-white truncate">\${p.name}</h3>
+                            <p class="text-[10px] text-slate-400 truncate">\${p.packageName || 'com.app.mobil'} • \${p.swipeEnabled ? 'Swipe Aktif' : 'Normal'}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1.5 shrink-0">
+                        <button onclick="editProject('\${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 p-2 rounded-xl transition" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="runProject('\${p.id}')" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl transition shadow-md" title="Test Et"><i class="fa-solid fa-play"></i></button>
+                        <button onclick="deleteProject('\${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 p-2 rounded-xl transition" title="Sil"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                \`;
+                container.appendChild(card);
+            });
+        }
+
+        function openNewProjectModal() { document.getElementById('projectModal').classList.remove('hidden'); }
+        function closeNewProjectModal() { document.getElementById('projectModal').classList.add('hidden'); }
+
+        function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
+        function closeSettingsModal() { 
+            // Ayarları kaydet
+            const p = projects.find(x => x.id === currentProjectId);
+            if (p) {
+                p.packageName = document.getElementById('pkgName').value.trim() || 'com.pro.app';
+                p.versionName = document.getElementById('pkgVersionName').value.trim() || '1.0.0';
+                p.versionCode = parseInt(document.getElementById('pkgVersionCode').value) || 1;
+                p.permissions = {
+                    internet: document.getElementById('permInternet').checked,
+                    location: document.getElementById('permLocation').checked,
+                    audio: document.getElementById('permAudio').checked,
+                    camera: document.getElementById('permCamera').checked,
+                    storage: document.getElementById('permStorage').checked
+                };
+                p.swipeEnabled = document.getElementById('featureSwipe').checked;
+                saveToStorage();
+                showToast('İzinler ve ayarlar güncellendi!');
+            }
+            document.getElementById('settingsModal').classList.add('hidden'); 
+        }
+
+        function createNewProject() {
+            const name = document.getElementById('newProjName').value.trim() || 'Yeni Proje';
+            const newProj = {
+                id: 'proj_' + Date.now(),
+                name: name,
+                packageName: 'com.app.' + name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                versionName: '1.0.0',
+                versionCode: 1,
+                permissions: { internet: true, location: false, audio: false, camera: false, storage: false },
+                swipeEnabled: true,
+                html: '<!DOCTYPE html>\n<html lang="tr">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>' + name + '</title>\n<script src="https://cdn.tailwindcss.com"><\/script>\n</head>\n<body class="bg-slate-950 text-white p-6 flex flex-col items-center justify-center h-screen text-center">\n<h1 class="text-lg font-bold mb-2">' + name + '</h1>\n<p class="text-xs text-slate-400">Harika uygulamanızı buradan geliştirebilirsiniz!</p>\n</body>\n</html>',
+                css: '/* Özel stil kodları */',
+                js: '// JavaScript mantığı'
+            };
+            projects.push(newProj);
+            saveToStorage();
+            closeNewProjectModal();
+            document.getElementById('newProjName').value = '';
+            showToast('Proje oluşturuldu!');
+            editProject(newProj.id);
+        }
+
+        function editProject(id) {
+            currentProjectId = id;
+            const p = projects.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('editingProjectName').innerText = p.name;
+            document.getElementById('codeHtml').value = p.html;
+            document.getElementById('codeCss').value = p.css;
+            document.getElementById('codeJs').value = p.js;
+            
+            // Ayarları yükle
+            document.getElementById('pkgName').value = p.packageName || 'com.pro.app';
+            document.getElementById('pkgVersionName').value = p.versionName || '1.0.0';
+            document.getElementById('pkgVersionCode').value = p.versionCode || 1;
+            if (p.permissions) {
+                document.getElementById('permInternet').checked = !!p.permissions.internet;
+                document.getElementById('permLocation').checked = !!p.permissions.location;
+                document.getElementById('permAudio').checked = !!p.permissions.audio;
+                document.getElementById('permCamera').checked = !!p.permissions.camera;
+                document.getElementById('permStorage').checked = !!p.permissions.storage;
+            }
+            document.getElementById('featureSwipe').checked = p.swipeEnabled !== false;
+            
+            switchTab('editor');
+        }
+
+        function saveCurrentProject() {
+            const p = projects.find(x => x.id === currentProjectId);
+            if (!p) return;
+            p.html = document.getElementById('codeHtml').value;
+            p.css = document.getElementById('codeCss').value;
+            p.js = document.getElementById('codeJs').value;
+            saveToStorage();
+            showToast('Proje kaydedildi!');
+        }
+
+        function runCurrentProject() {
+            saveCurrentProject();
+            runProject(currentProjectId);
+        }
+
+        function runProject(id) {
+            const p = projects.find(x => x.id === id);
+            if (!p) return;
+            const iframe = document.getElementById('previewFrame');
+            
+            // CSS ve JS'i HTML içine enjekte ederek önizleme yap
+            let fullHtml = p.html;
+            if (p.css && !fullHtml.includes(p.css)) {
+                fullHtml = fullHtml.replace('</head>', `<style>${p.css}</style></head>`);
+            }
+            if (p.js && !fullHtml.includes(p.js)) {
+                fullHtml = fullHtml.replace('</body>', `<script>${p.js}<\/script></body>`);
+            }
+            
+            iframe.srcdoc = fullHtml;
+            switchTab('runner');
+        }
+
+        function deleteProject(id) {
+            projects = projects.filter(x => x.id !== id);
+            saveToStorage();
+            showToast('Proje silindi.');
+        }
+
+        function generateExportCodes() {
+            const p = projects.find(x => x.id === currentProjectId);
+            if (!p) return;
+
+            let permsXml = '';
+            if (p.permissions?.internet) permsXml += '    <uses-permission android:name="android.permission.INTERNET" />\n';
+            if (p.permissions?.location) permsXml += '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n';
+            if (p.permissions?.audio) permsXml += '    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n';
+            if (p.permissions?.camera) permsXml += '    <uses-permission android:name="android.permission.CAMERA" />\n';
+            if (p.permissions?.storage) permsXml += '    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />\n';
+
+            const manifestCode = `<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android"\n    package="${p.packageName || 'com.pro.app'}">\n\n${permsXml}\n    <application\n        android:allowBackup="true"\n        android:icon="@mipmap/ic_launcher"\n        android:label="@string/app_name"\n        android:theme="@style/AppTheme">\n        <activity\n            android:name=".MainActivity"\n            android:exported="true"\n            android:configChanges="orientation|screenSize">\n            <intent-filter>\n                <action android:name="android.intent.action.MAIN" />\n                <category android:name="android.intent.category.LAUNCHER" />\n            </intent-filter>\n        </activity>\n    </application>\n</manifest>`;
+
+            const workflowCode = `name: Build Pro APK\n\non:\n  push:\n    branches: [ main ]\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n    - name: Checkout Code\n      uses: actions/checkout@v4\n\n    - name: Set up JDK 17\n      uses: actions/setup-java@v4\n      with:\n        distribution: 'temurin'\n        java-version: '17'\n\n    - name: Build Android App\n      run: |\n        echo "Building APK for ${p.name} (${p.packageName})..."\n        echo "Swipe Mode: ${p.swipeEnabled ? 'Enabled' : 'Disabled'}"\n        # GitHub Actions otomatik Gradle derleme adımları buraya eklenecektir.`;
+
+            document.getElementById('manifestOutput').innerText = manifestCode;
+            document.getElementById('workflowOutput').innerText = workflowCode;
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('Panoya kopyalandı!');
+        }
+
+        window.onload = function() {
+            renderProjectsList();
+        };
+    </script>
+</body>
+</html>
+```
